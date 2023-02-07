@@ -1,6 +1,9 @@
 import { previewData } from 'next/headers';
 import { groq } from 'next-sanity'; // groq is the query language or graphql equivalent in Sanity's world
 import { client } from '../../lib/sanity.client';
+import PreviewSuspense from '../../components/PreviewSuspense';
+import PreviewBlogList from '../../components/PreviewBlogList';
+import BlogList from '../../components/BlogList';
 
 const query = groq`
   *[_type=='post'] { // get all the posts
@@ -12,7 +15,16 @@ const query = groq`
 
 export default async function Page() {
   if (previewData()) {
-    return <h1 className='text-3xl font-bold'>Preview mode</h1>;
+    return (
+      <PreviewSuspense
+        fallback={
+          <div>
+            <h3>Loading Preview Data...</h3>
+          </div>
+        }>
+        <PreviewBlogList query={query} />
+      </PreviewSuspense>
+    );
   }
 
   // if NOT in preview mode:
@@ -20,7 +32,7 @@ export default async function Page() {
   return (
     <div>
       <h1 className='text-3xl font-bold'>Not in preview mode</h1>
-      <p>some page content...</p>
+      <BlogList posts={posts} />
     </div>
   );
 }
